@@ -1,5 +1,5 @@
 import { dbContext } from '../db/DbContext'
-import { BadRequest } from '../utils/Errors'
+import { BadRequest, Forbidden } from '../utils/Errors'
 
 class GalaxiesService {
   async getAll(query = {}) {
@@ -18,6 +18,23 @@ class GalaxiesService {
   async create(body) {
     const newGalaxy = await dbContext.Galaxies.create(body)
     return await this.getById(newGalaxy.id)
+  }
+
+  async edit(update) {
+    const galaxy = await this.getById(update.id)
+    if (galaxy.creatorId.toString() !== update.creatorId) {
+      throw new Forbidden('access denied')
+    }
+    const updated = await dbContext.Galaxies.findByIdAndUpdate(update.id, update, { new: true })
+    return updated
+  }
+
+  async remove(galaxyId, userId) {
+    const galaxy = await this.getById(galaxyId)
+    if (galaxy.creatorId.toString() !== userId) {
+      throw new Forbidden('access denied')
+    }
+    await dbContext.Galaxies.findByIdAndDelete(galaxyId)
   }
 }
 
