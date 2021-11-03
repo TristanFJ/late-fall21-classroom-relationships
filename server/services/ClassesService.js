@@ -15,6 +15,21 @@ class ClassesService {
     return found
   }
 
+  async getByStudentId(id) {
+    // get by the many to many relationship
+    const classes = await dbContext.Enrollments.find({ studentId: id }).populate('class')
+    // STUB Version 2.0
+    // const clean = classes.map(result => {
+    //   return {
+    //     enrollmentId: result.id,
+    //     ...JSON.parse(JSON.stringify(result.class))
+    //   }
+    // })
+    return classes
+    // STUB 2.0
+    // return clean
+  }
+
   async create(body) {
     const newClass = await dbContext.Classes.create(body)
     return await this.getById(newClass.id)

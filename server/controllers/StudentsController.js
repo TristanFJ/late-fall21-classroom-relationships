@@ -1,4 +1,5 @@
 import { Auth0Provider } from '@bcwdev/auth0provider'
+import { classesService } from '../services/ClassesService'
 import { studentsService } from '../services/StudentsService'
 import BaseController from '../utils/BaseController'
 
@@ -8,6 +9,7 @@ export class StudentsController extends BaseController {
     this.router
       .get('', this.getAll)
       .get('/:id', this.getById)
+      .get('/:id/classes', this.getClasses)
       // NOTE: Beyond this point all routes require Authorization tokens (the user must be logged in)
       .use(Auth0Provider.getAuthorizedUserInfo)
       .post('', this.create)
@@ -29,6 +31,15 @@ export class StudentsController extends BaseController {
     try {
       const student = await studentsService.getById(req.params.id)
       return res.send(student)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async getClasses(req, res, next) {
+    try {
+      const classes = await classesService.getByStudentId(req.params.id)
+      return res.send(classes)
     } catch (error) {
       next(error)
     }

@@ -1,15 +1,14 @@
 import { Auth0Provider } from '@bcwdev/auth0provider'
 import { booksService } from '../services/BooksService'
-import { classesService } from '../services/ClassesService'
 import BaseController from '../utils/BaseController'
 
-export class ClassesController extends BaseController {
+export class BooksController extends BaseController {
   constructor() {
-    super('api/classes')
+    super('api/books')
     this.router
       .get('', this.getAll)
       .get('/:id', this.getById)
-      .get('/:id/books', this.getAllBooks)
+      // NOTE: Beyond this point all routes require Authorization tokens (the user must be logged in)
       .use(Auth0Provider.getAuthorizedUserInfo)
       .post('', this.create)
       .put('/:id', this.edit)
@@ -19,8 +18,8 @@ export class ClassesController extends BaseController {
   async getAll(req, res, next) {
     try {
       const query = req.query
-      const classes = await classesService.getAll(query)
-      return res.send(classes)
+      const books = await booksService.getAll(query)
+      return res.send(books)
     } catch (error) {
       next(error)
     }
@@ -28,18 +27,8 @@ export class ClassesController extends BaseController {
 
   async getById(req, res, next) {
     try {
-      const classResult = await classesService.getById(req.params.id)
-      return res.send(classResult)
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  async getAllBooks(req, res, next) {
-    try {
-      // using the same find method I can pass a query to determine what comes back
-      const books = await booksService.getAll({ classId: req.params.id })
-      return res.send(books)
+      const book = await booksService.getById(req.params.id)
+      return res.send(book)
     } catch (error) {
       next(error)
     }
@@ -47,9 +36,11 @@ export class ClassesController extends BaseController {
 
   async create(req, res, next) {
     try {
+      // NEver trust the client
       req.body.creatorId = req.userInfo.id
-      const newClass = await classesService.create(req.body)
-      return res.send(newClass)
+      const book = await booksService.create(req.body)
+      // custom status code
+      return res.status(201).send(book)
     } catch (error) {
       next(error)
     }
@@ -57,10 +48,11 @@ export class ClassesController extends BaseController {
 
   async edit(req, res, next) {
     try {
+      // NEver trust
       req.body.creatorId = req.userInfo.id
       req.body.id = req.params.id
-      const update = await classesService.edit(req.body)
-      return res.send(update)
+      const book = await booksService.edit(req.body)
+      return res.send(book)
     } catch (error) {
       next(error)
     }
@@ -68,8 +60,10 @@ export class ClassesController extends BaseController {
 
   async remove(req, res, next) {
     try {
-      await classesService.remove(req.params.id, req.userInfo.id)
-      return res.send('deleted')
+      const userId = req.userInfo.id
+      const bookId = req.params.id
+      await booksService.remove(bookId, userId)
+      return res.send('Deleted')
     } catch (error) {
       next(error)
     }
