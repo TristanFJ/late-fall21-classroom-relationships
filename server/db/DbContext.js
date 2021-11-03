@@ -3,6 +3,7 @@ import { AccountSchema, ProfileSchema } from '../models/Account'
 import { BookSchema } from '../models/Books'
 import { ClassSchema } from '../models/Class'
 import { EnrollmentSchema } from '../models/Enrollment'
+import { GalaxySchema } from "../models/Galaxy"
 import { StudentSchema } from '../models/student'
 import { ValueSchema } from '../models/Value'
 
@@ -14,6 +15,8 @@ class DbContext {
   Students = mongoose.model('Student', StudentSchema)
   Books = mongoose.model('Book', BookSchema)
   Enrollments = mongoose.model('Enrollment', EnrollmentSchema)
+Galaxies = mongoose.model('Galaxy', GalaxySchema)
+
 }
 
 export const dbContext = new DbContext()
